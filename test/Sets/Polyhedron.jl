@@ -219,6 +219,61 @@ for N in [Float64]
     # boundedness
     @test isbounded(p)
 
+    # support vector in the direction of a halfspace
+    # p_parallel is a cube of radius 4
+    p_parallel = HPolyhedron{N}()
+    c1 = LinearConstraint(N[1, 0, 0], N(2))
+    c2 = LinearConstraint(N[-1, 0, 0], N(2))
+    c3 = LinearConstraint(N[0, 1, 0], N(2))
+    c4 = LinearConstraint(N[0, -1, 0], N(2))
+    c5 = LinearConstraint(N[0, 0, 1], N(2))
+    c6 = LinearConstraint(N[0, 0, -1], N(2))
+
+    addconstraint!(p_parallel, c1)
+    addconstraint!(p_parallel, c2)
+    addconstraint!(p_parallel, c3)
+    addconstraint!(p_parallel, c4)
+    addconstraint!(p_parallel, c5)
+    addconstraint!(p_parallel, c6)
+
+    # The support vector for p_parallel is a hyperplane
+    p_support_vector = HPolyhedron{N}()
+    c1 = LinearConstraint(N[1, 0, 0], N(2))
+    c2 = LinearConstraint(N[-1, 0, 0], N(-2))
+    c3 = LinearConstraint(N[0, 1, 0], N(2))
+    c4 = LinearConstraint(N[0, -1, 0], N(2))
+    c5 = LinearConstraint(N[0, 0, 1], N(2))
+    c6 = LinearConstraint(N[0, 0, -1], N(2))
+
+    addconstraint!(p_support_vector, c1)
+    addconstraint!(p_support_vector, c2)
+    addconstraint!(p_support_vector, c3)
+    addconstraint!(p_support_vector, c4)
+    addconstraint!(p_support_vector, c5)
+    addconstraint!(p_support_vector, c6)
+
+    d = N[1, 0, 0]
+    @test σ(d, p_parallel) ∈ p_support_vector
+
+
+    # support vector with orthogonal constraints
+    # and an angled plane in the direction.
+    p_ortho = HPolyhedron{N}()
+    c1 = LinearConstraint(N[1, 1, 1], N(4))
+    c2 = LinearConstraint(N[0, 1, 0], N(2))
+    c3 = LinearConstraint(N[0, -1, 0], N(2))
+    c4 = LinearConstraint(N[0, 0, 1], N(2))
+    c5 = LinearConstraint(N[0, 0, -1], N(2))
+
+    addconstraint!(p_ortho, c1)
+    addconstraint!(p_ortho, c2)
+    addconstraint!(p_ortho, c3)
+    addconstraint!(p_ortho, c4)
+    addconstraint!(p_ortho, c5)
+
+    d = N[1, 0, 0]
+    @test σ(d, p_ortho) == N[8, -2, -2]
+
     if test_suite_polyhedra
         p_unbounded = HPolyhedron([LinearConstraint(N[-1, 0], N(-1))])
         p_infeasible = HPolyhedron([LinearConstraint(N[1], N(0)),
